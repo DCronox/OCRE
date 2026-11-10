@@ -107,7 +107,8 @@ body::after {
 .btn--texto:hover { color: var(--caliza); background-size: 0 1px; background-position: right calc(100% - .55rem); }
 .btn--grande { min-height: 3.6rem; padding-inline: 2.6rem; font-size: var(--t-m); }
 .btn:active { transform: translateY(1px); }
-a[target="_blank"].btn::after { content: "↗"; font-size: .85em; opacity: .7; }
+a[target="_blank"].btn::after { content: "↗"; font-size: .85em; opacity: .7; display: inline-block; transition: transform .45s var(--curva); }
+a[target="_blank"].btn:hover::after { transform: translate(2px, -2px); }
 
 /* ---------- Navegación: discreta sobre la portada, sólida al desplazarse ---------- */
 .nav {
@@ -296,4 +297,17 @@ a[target="_blank"].btn::after { content: "↗"; font-size: .85em; opacity: .7; }
   .nav.is-abierta .nav__reservar-movil { animation-delay: .35s; }
   .nav.is-abierta .nav__pie-movil { animation-delay: .42s; }
   @keyframes menu-entra { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+}
+
+/* ---------- Motion v4: palabras y grupos escalonados ----------
+   Titulares por palabras (de desenfocado a nítido) y entradas en cascada.
+   Solo con JS y movimiento permitido: sin JS todo es visible. */
+@media (prefers-reduced-motion: no-preference) {
+  .js-revela .revela-palabras .palabra { display: inline-block; opacity: 0; filter: blur(8px); transform: translateY(.35em);
+    transition: opacity .9s var(--curva), filter .9s var(--curva), transform 1s var(--curva);
+    transition-delay: calc(var(--retardo, 0ms) + var(--i, 0) * var(--paso, 60ms)); }
+  .js-revela .revela-palabras.is-visible .palabra { opacity: 1; filter: blur(0); transform: none; }
+  .js-revela .revela-grupo > * { opacity: 0; transform: translateY(22px);
+    transition: opacity .9s var(--curva), transform 1s var(--curva); transition-delay: calc(var(--i, 0) * var(--paso, 90ms)); }
+  .js-revela .revela-grupo.is-visible > * { opacity: 1; transform: none; }
 }

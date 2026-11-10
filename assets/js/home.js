@@ -90,6 +90,7 @@
       texto.textContent = "";
       texto.appendChild(document.createTextNode(d.ingredientes ? "Ingredientes de " : "En la imagen: "));
       texto.appendChild(h("em", null, d.nombre || ""));
+      texto.classList.remove("is-cambiando"); void texto.offsetWidth; texto.classList.add("is-cambiando");
       contador.textContent = String(i + 1).padStart(2, "0") + " / " + String(diapos.length).padStart(2, "0");
     }
     pintarLeyenda();
@@ -186,7 +187,8 @@
         h("span", { class: "ritual__texto" }, [
           h("span", { class: "ritual__nombre" }, g.titulo),
           h("span", { class: "ritual__linea" }, g.linea),
-          h("span", { class: "ritual__meta" }, n + (n === 1 ? " pieza" : " piezas") + (conFoto ? "" : ", fotografías en producción"))
+          h("span", { class: "ritual__meta" }, n + (n === 1 ? " pieza" : " piezas") + (conFoto ? "" : ", fotografías en producción")),
+          h("span", { class: "ritual__abrir", "aria-hidden": "true" }, "Abrir galería")
         ])
       ]);
       btn.addEventListener("click", function () { abrirGaleria(g, btn); });
@@ -210,6 +212,7 @@
     visor = document.getElementById("visor");
     galeria.querySelector("[data-cerrar]").addEventListener("click", function () { galeria.close(); });
     galeria.addEventListener("close", function () {
+      soltarPiezas();
       document.body.classList.remove("sin-scroll");
       visor.hidden = true;
       if (location.hash.indexOf("#galeria-") === 0) history.replaceState(null, "", location.pathname + location.search + "#ritual");
@@ -285,7 +288,7 @@
     g.items.forEach(function (it, i) {
       var b = h("button", { class: "pieza__boton", type: "button", "aria-label": "Ver " + it.titulo + " a pantalla completa" }, [
         h("figure", null, [
-          h("div", { class: "pieza__marco" }, O.foto(it.foto, { ancho: it.ancho, alto: it.alto, alt: it.alt || it.titulo, encargo: it.encargo, sizes: "(max-width: 760px) 100vw, 55vw" })),
+          h("div", { class: "pieza__marco" }, [O.foto(it.foto, { ancho: it.ancho, alto: it.alto, alt: it.alt || it.titulo, encargo: it.encargo, sizes: "(max-width: 760px) 100vw, 55vw" }), h("span", { class: "pieza__ampliar", "aria-hidden": "true" }, "Ampliar")]),
           h("figcaption", null, [
             h("span", { class: "pieza__n", "aria-hidden": "true" }, String(i + 1)),
             h("h3", null, it.titulo),
@@ -476,12 +479,27 @@
       paneles.appendChild(panel);
     });
 
+    // Indicador que se desliza bajo la pestaña activa
+    var indicador = h("span", { class: "carta__indicador", "aria-hidden": "true" });
+    tabs.appendChild(indicador); tabs.classList.add("con-indicador");
+    function moverIndicador() {
+      var b = botones.filter(function (x) { return x.getAttribute("aria-selected") === "true"; })[0];
+      if (!b) return;
+      indicador.style.width = b.offsetWidth + "px";
+      indicador.style.transform = "translateX(" + b.offsetLeft + "px)";
+    }
+    window.addEventListener("resize", moverIndicador);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(moverIndicador);
+    requestAnimationFrame(moverIndicador);
     function seleccionar(i, foco) {
       botones.forEach(function (b, j) {
         var on = j === i;
         b.setAttribute("aria-selected", String(on)); b.tabIndex = on ? 0 : -1;
-        document.getElementById(b.getAttribute("aria-controls")).hidden = !on;
+        var panel = document.getElementById(b.getAttribute("aria-controls"));
+        panel.hidden = !on;
+        if (on) { panel.classList.remove("is-entrando"); void panel.offsetWidth; panel.classList.add("is-entrando"); }
       });
+      moverIndicador();
       if (foco) botones[i].focus();
       botones[i].scrollIntoView({ block: "nearest", inline: "nearest" });
     }
@@ -624,10 +642,11 @@
       var cap = e.capacidad && e.capacidad.confirmado ? h("p", { class: "espacio__capacidad" }, e.capacidad.texto) : null;
       var ritmo = e.id === "dance-floor" ? h("span", { class: "espacio__ritmo", "aria-hidden": "true" }, [h("i"), h("i"), h("i"), h("i"), h("i"), h("i"), h("i")]) : null;
       var art = h("article", { class: "espacio espacio--" + e.id, id: "espacio-" + e.id, "aria-labelledby": "espacio-titulo-" + e.id }, [
+        h("span", { class: "espacio__fantasma", "aria-hidden": "true", "data-deriva": n % 2 ? "-1" : "1" }, e.nombre),
         h("div", { class: "espacio__fotos" }, fotos),
         h("div", { class: "espacio__texto" }, [
           h("p", { class: "espacio__n", "aria-hidden": "true" }, String(n + 1).padStart(2, "0")),
-          h("h3", { class: "espacio__nombre revela-titulo", id: "espacio-titulo-" + e.id }, [e.nombre, ritmo]),
+          h("h3", { class: "espacio__nombre", id: "espacio-titulo-" + e.id }, [e.nombre, ritmo]),
           h("p", { class: "espacio__lema" }, e.lema),
           h("p", { class: "espacio__desc" }, e.texto),
           (e.notas || []).length ? h("ul", { class: "espacio__notas", "aria-label": "Características" }, e.notas.map(function (x) { return h("li", null, x); })) : null,
@@ -662,17 +681,46 @@
 
   /* Revelados al desplazarse: titulares, fotografías y piezas. */
   function revelarComposiciones() {
-    document.querySelectorAll("main .titulo-seccion").forEach(function (t) { t.classList.add("revela-titulo"); });
-    document.querySelectorAll(".ocasion__foto, .reservas__foto, .cartel, .trazo").forEach(function (f) { f.classList.add("revela"); });
+    // Titulares de sección y nombres de los espacios: palabra a palabra
+    document.querySelectorAll("main .titulo-seccion, .espacio__nombre").forEach(function (t) { t.classList.remove("revela-titulo", "revela-texto"); O.dividirPalabras(t); });
+    // Portada: el lema entra palabra a palabra al final de la secuencia de OCRE
+    O.dividirPalabras(document.querySelector(".hero__lema"), { retardo: "1350ms", paso: "80ms" });
+    // Universo: la entrada narrativa, más lenta y corrida
+    var entrada = document.querySelector(".universo__entrada");
+    if (entrada) { entrada.classList.remove("revela-texto"); O.dividirPalabras(entrada, { paso: "22ms" }); }
+    // Grupos que entran en cascada
+    [".pilares", "#ocasiones", ".pasos", ".datos", ".espacio__notas", ".eventos", ".artistas"].forEach(function (s) {
+      document.querySelectorAll(s).forEach(function (el) { O.escalonar(el); });
+    });
+    document.querySelectorAll(".reservas__foto, .trazo").forEach(function (f) { f.classList.add("revela"); });
+    document.querySelectorAll(".cartel").forEach(function (f) { f.classList.add("revela-texto"); });
+    contarCalificacion();
     if (O.revelar) O.revelar(document);
   }
+  var observadorPiezas = null;
+  function soltarPiezas() { if (observadorPiezas) { observadorPiezas.disconnect(); observadorPiezas = null; } }
   function revelarPiezas(cont) {
+    soltarPiezas();
     var items = cont.querySelectorAll(".pieza");
     if (!document.documentElement.classList.contains("js-revela") || !("IntersectionObserver" in window)) return;
-    var io = new IntersectionObserver(function (en) {
-      en.forEach(function (x) { if (x.isIntersecting) { x.target.classList.add("is-visible"); io.unobserve(x.target); } });
+    var io = observadorPiezas = new IntersectionObserver(function (en) {
+      en.forEach(function (x) { var pasado = x.rootBounds && x.boundingClientRect.bottom < x.rootBounds.top; if (x.isIntersecting || pasado) { x.target.classList.add("is-visible"); io.unobserve(x.target); } });
     }, { root: document.getElementById("galeria-cuerpo"), rootMargin: "0px 0px -6% 0px" });
     items.forEach(function (it, i) { it.classList.add("pieza--revela"); it.style.transitionDelay = (i % 2) * 0.12 + "s"; io.observe(it); });
+    // Red de seguridad dentro del diálogo: piezas que quedaron arriba sin cruzar la vista
+    var raiz = document.getElementById("galeria-cuerpo"), ocupado = false;
+    if (raiz.dataset.revisor) return;
+    raiz.dataset.revisor = "1";
+    raiz.addEventListener("scroll", function () {
+      if (ocupado) return; ocupado = true;
+      requestAnimationFrame(function () {
+        ocupado = false;
+        var tope = raiz.getBoundingClientRect().top;
+        raiz.querySelectorAll(".pieza--revela:not(.is-visible)").forEach(function (p) {
+          if (p.getBoundingClientRect().bottom < tope) { p.classList.add("is-visible"); if (observadorPiezas) observadorPiezas.unobserve(p); }
+        });
+      });
+    }, { passive: true });
   }
 
   /* Profundidad: un único bucle de desplazamiento (solo transformaciones).
@@ -684,13 +732,39 @@
     var nav = document.getElementById("nav"), hero = document.getElementById("inicio");
     var escenario = hero && hero.querySelector(".hero__escenario");
     var capas = [].slice.call(document.querySelectorAll("[data-parallax]"));
+    var fantasmas = [].slice.call(document.querySelectorAll(".espacio__fantasma"));
+    var banda = document.querySelector(".marquesina"), bandaFila = banda && banda.firstElementChild;
+    var compacto = window.matchMedia("(max-width: 760px), (pointer: coarse)");
+    var limpio = false;
+    if (!reducido && banda) banda.classList.add("js-deriva");
     var pendiente = false;
     function cuadro() {
       pendiente = false;
       var y = window.scrollY, vh = window.innerHeight;
       var total = document.documentElement.scrollHeight - vh;
       if (nav) nav.style.setProperty("--progreso", total > 0 ? (y / total).toFixed(4) : 0);
+      if (hero) hero.classList.toggle("is-desplazado", y > 80);
       if (reducido) return;
+      // Banda de palabras: deriva horizontal ligada al desplazamiento (no autónoma)
+      if (bandaFila) {
+        var rb = banda.getBoundingClientRect();
+        if (rb.bottom > 0 && rb.top < vh) {
+          var pb = (vh - rb.top) / (vh + rb.height);
+          bandaFila.style.transform = "translate3d(" + (-pb * Math.max(0, bandaFila.scrollWidth - banda.clientWidth) * 0.55).toFixed(1) + "px,0,0)";
+        }
+      }
+      // En móvil y pantallas táctiles no hay paralaje: se limpian las transformaciones una vez
+      if (compacto.matches) {
+        if (!limpio) { capas.concat(fantasmas).forEach(function (el) { el.style.transform = ""; }); if (escenario) escenario.style.transform = ""; limpio = true; }
+        return;
+      }
+      limpio = false;
+      fantasmas.forEach(function (el) {
+        var r = el.parentNode.getBoundingClientRect();
+        if (r.bottom < 0 || r.top > vh) return;
+        var c = (r.top + r.height / 2 - vh / 2) / vh;
+        el.style.transform = "translate3d(" + (c * parseFloat(el.dataset.deriva) * 180).toFixed(1) + "px,0,0)";
+      });
       if (escenario && y < vh * 1.2) escenario.style.transform = "translate3d(0," + (y * 0.08).toFixed(1) + "px,0)";
       capas.forEach(function (el) {
         var r = el.getBoundingClientRect();
@@ -716,5 +790,27 @@
         });
       });
     }
+  }
+
+  /* Reseñas: la calificación cuenta hasta su valor real al aparecer. */
+  function contarCalificacion() {
+    var el = document.querySelector(".calificacion__valor"), g = S.google;
+    if (!el || !g || !g.valor || !("IntersectionObserver" in window) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var num = el.firstChild;   // nodo de texto con el valor
+    if (!num || num.nodeType !== 3) return;
+    el.setAttribute("aria-label", String(g.valor).replace(".", ",") + " de 5");
+    var io = new IntersectionObserver(function (en) {
+      if (!en[0].isIntersecting) return;
+      io.disconnect();
+      var t0 = null, dur = 1400;
+      (function paso(t) {
+        if (!t0) t0 = t;
+        var p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+        num.textContent = (g.valor * e).toFixed(1).replace(".", ",");
+        if (p < 1) requestAnimationFrame(paso);
+      })(performance.now());
+    }, { threshold: .6 });
+    num.textContent = "0,0";
+    io.observe(el);
   }
 })();

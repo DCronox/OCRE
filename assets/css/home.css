@@ -73,7 +73,6 @@ main > section { position: relative; padding: var(--seccion) var(--margen); }
   .pigmento { animation: enfocar 2s .15s cubic-bezier(.16,.84,.3,1) both, destello 1.6s 1.7s ease-in-out both; }
   .hero__escenario { animation: descubrir 1.7s .7s var(--curva) both; }
   .hero__lugar { animation: aparecer 1s 1.2s var(--curva) both; }
-  .hero__lema { animation: aparecer 1s 1.45s var(--curva) both; }
   .hero__acciones { animation: aparecer 1s 1.65s var(--curva) both; }
   .hero__leyenda { animation: aparecer 1s 1.9s var(--curva) both; }
   .hero__titulo:hover .pigmento { animation: destello 1.4s ease-in-out both; }
@@ -152,6 +151,8 @@ main > section { position: relative; padding: var(--seccion) var(--margen); }
 .marquesina { overflow: hidden; padding: 1.4rem var(--margen); background: linear-gradient(100deg, #B8782F 0%, var(--ocre-banda) 35%, #DDA35C 60%, #B87631 100%); }
 .marquesina div { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem clamp(1.6rem, 4vw, 3.4rem); font: italic 400 clamp(1.3rem, 2.4vw, 1.9rem)/1.3 var(--serif); color: var(--tinta); }
 .marquesina span:nth-child(n + 8) { display: none; }
+.marquesina.js-deriva div { flex-wrap: nowrap; justify-content: flex-start; width: max-content; gap: 0 clamp(2rem, 5vw, 4.5rem); will-change: transform; }
+.marquesina.js-deriva span:nth-child(n + 8) { display: inline; }
 
 
 /* ---------- El ritual de los sentidos: índice + visor ---------- */
@@ -500,7 +501,7 @@ body.sin-scroll { overflow: hidden; }
 .espacios__indice a:hover { color: var(--ambar); }
 .espacios__indice a:hover::after { right: 0; }
 
-.espacio { max-width: var(--ancho); margin: 0 auto; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 2rem; align-items: center; position: relative; scroll-margin-top: calc(var(--nav-alto) + 1rem); }
+.espacio { max-width: var(--ancho); margin: 0 auto; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 2rem; align-items: center; position: relative; isolation: isolate; scroll-margin-top: calc(var(--nav-alto) + 1rem); }
 .espacio + .espacio { margin-top: clamp(6rem, 12vw, 11rem); }
 .espacio__fotos { position: relative; }
 .espacio__foto { margin: 0; will-change: transform; }
@@ -578,3 +579,79 @@ body.sin-scroll { overflow: hidden; }
   .espacio--sentidos .espacio__desc { margin-top: 1.4rem; }
   .espacio__foto { will-change: auto; }
 }
+
+
+/* =====================================================================
+   MOTION v4 — inspirado en el ritmo de Portfolite, con identidad OCRE
+   ===================================================================== */
+/* Portada: indicador para desplazarse (se oculta al bajar) */
+.hero__desliza { display: inline-flex; align-items: center; gap: 1rem; margin-top: 2.2rem; color: var(--caliza-suave); font-size: var(--t-xs); letter-spacing: .14em; text-decoration: none; pointer-events: auto; transition: opacity .6s var(--curva); }
+.hero__desliza i { position: relative; width: 4.5rem; height: 1px; background: var(--linea-fuerte); overflow: hidden; }
+.hero__desliza i::after { content: ""; position: absolute; top: -1px; left: 0; width: 1.2rem; height: 3px; border-radius: 2px; background: var(--ambar); }
+.hero__desliza:hover { color: var(--ambar); }
+.hero.is-desplazado .hero__desliza { opacity: 0; pointer-events: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .hero__desliza { animation: aparecer 1s 2.1s var(--curva) both; }
+  .hero__desliza i::after { animation: desliza-punto 2.4s 2.6s cubic-bezier(.6,0,.3,1) infinite; }
+  .hero.is-desplazado .hero__desliza i::after { animation-play-state: paused; }
+  @keyframes desliza-punto { 0% { transform: translateX(-1.2rem); } 70%, 100% { transform: translateX(4.5rem); } }
+  /* El nombre del producto entra deslizándose al cambiar */
+  .hero__leyenda-texto.is-cambiando em { display: inline-block; animation: nombre-entra .9s var(--curva) both; }
+  @keyframes nombre-entra { from { opacity: 0; transform: translateY(.6em); filter: blur(4px); } to { opacity: 1; transform: none; filter: blur(0); } }
+}
+@media (max-width: 760px) { .hero__desliza { display: none; } }
+
+/* Universo: la segunda foto se revela desde el lateral (no desde abajo) */
+@media (prefers-reduced-motion: no-preference) {
+  .js-revela .revela.revela--lateral { clip-path: inset(0 0 0 100%); transition: clip-path 1.5s cubic-bezier(.65,0,.2,1) .2s; }
+  .js-revela .revela.revela--lateral.is-visible { clip-path: inset(0); }
+}
+
+/* Ritual: indicador «Abrir galería» que entra en la categoría activa */
+.ritual__abrir { grid-column: 2; grid-row: 2; justify-self: end; display: inline-flex; align-items: center; gap: .5rem; font-size: var(--t-xs); letter-spacing: .08em; color: var(--ambar);
+  opacity: 0; transform: translateX(-10px); transition: opacity .5s var(--curva), transform .6s var(--curva); }
+.ritual__abrir::after { content: "→"; }
+.ritual__item.is-activa .ritual__abrir { opacity: 1; transform: none; }
+.ritual__capa-texto { transform: translateY(18px); opacity: 0; transition: transform 1s var(--curva) .15s, opacity .9s var(--curva) .15s; }
+.ritual__capa.is-activa .ritual__capa-texto { transform: none; opacity: 1; }
+@media (max-width: 860px) {
+  /* En móvil no hay hover: el indicador es una píldora siempre visible */
+  .ritual__abrir { grid-column: 1; grid-row: auto; justify-self: start; opacity: 1; transform: none; margin-top: .6rem; padding: .35rem .8rem; border: 1px solid var(--linea-oro); border-radius: 999px;
+    background: rgba(43,28,16,.45); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); color: var(--caliza); }
+}
+
+/* Galerías: píldora de vidrio «Ampliar» sobre la foto (solo con cursor) */
+.pieza__ampliar { position: absolute; left: 50%; bottom: 1rem; z-index: 2; padding: .5rem 1.1rem; border-radius: 999px; font-size: var(--t-xs); letter-spacing: .08em; color: var(--caliza);
+  background: rgba(43,28,16,.42); border: 1px solid rgba(243,231,209,.25); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  opacity: 0; transform: translate(-50%, 10px); transition: opacity .5s var(--curva), transform .6s var(--curva); pointer-events: none; }
+@media (hover: hover) and (pointer: fine) {
+  .pieza__boton:hover .pieza__ampliar, .pieza__boton:focus-visible .pieza__ampliar { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* Espacios: palabra de gran formato en contorno, deriva horizontal (solo escritorio) */
+.espacio__fantasma { position: absolute; z-index: -1; top: -4rem; left: -6%; pointer-events: none; white-space: nowrap; will-change: transform;
+  font: italic 300 clamp(6rem, 17vw, 16rem)/1 var(--serif); color: transparent; -webkit-text-stroke: 1px rgba(230,188,122,.13); }
+.espacio--sombras .espacio__fantasma { left: auto; right: -8%; top: 0; }
+.espacio--sentidos .espacio__fantasma { top: 46%; }
+@media (max-width: 760px), (pointer: coarse) { .espacio__fantasma { display: none; } }
+
+/* Ocre Sounds: los carteles responden al cursor */
+@media (hover: hover) {
+  .cartel { transition: transform .6s var(--curva), border-color .5s var(--curva), box-shadow .6s var(--curva); }
+  .cartel:not(.cartel--vacio):hover { transform: translateY(-4px); border-color: var(--ambar); box-shadow: 0 30px 60px -30px rgba(0,0,0,.8); }
+}
+
+/* Carta: indicador que se desliza entre pestañas y entrada rápida de productos */
+.carta__tabs.con-indicador { position: sticky; }
+.carta__indicador { position: absolute; left: 0; top: .6rem; height: calc(100% - 1.4rem); width: 0; border-radius: var(--radio); background: var(--tinta); z-index: 0;
+  transition: transform .55s var(--curva), width .55s var(--curva); pointer-events: none; }
+.carta__tabs.con-indicador .carta__tab { position: relative; z-index: 1; }
+.carta__tabs.con-indicador .carta__tab[aria-selected="true"] { background: transparent; color: var(--papel); }
+@media (prefers-reduced-motion: no-preference) {
+  .carta__panel.is-entrando .plato, .carta__panel.is-entrando .barra-carta table { animation: aparecer .55s var(--curva) both; }
+  .carta__panel.is-entrando .plato:nth-child(2), .carta__panel.is-entrando table:nth-child(2) { animation-delay: .04s; }
+  .carta__panel.is-entrando .plato:nth-child(3), .carta__panel.is-entrando table:nth-child(3) { animation-delay: .08s; }
+  .carta__panel.is-entrando .plato:nth-child(4), .carta__panel.is-entrando table:nth-child(4) { animation-delay: .12s; }
+  .carta__panel.is-entrando .plato:nth-child(n + 5), .carta__panel.is-entrando table:nth-child(n + 5) { animation-delay: .16s; }
+}
+@media (prefers-reduced-motion: reduce) { .carta__indicador { transition: none; } }

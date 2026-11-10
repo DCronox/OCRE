@@ -120,16 +120,74 @@
   /* Revelado al entrar en pantalla. Sin IntersectionObserver o con movimiento
      reducido no se oculta nada: el contenido siempre es visible. */
   var observadorRevela = null;
+  var pendientes = [];
   O.revelar = function (ambito) {
     if (!observadorRevela) return;
-    (ambito || document).querySelectorAll(".revela:not(.is-visible), .revela-texto:not(.is-visible), .revela-titulo:not(.is-visible)").forEach(function (el) { observadorRevela.observe(el); });
+    (ambito || document).querySelectorAll(".revela:not(.is-visible), .revela-texto:not(.is-visible), .revela-titulo:not(.is-visible), .revela-palabras:not(.is-visible), .revela-grupo:not(.is-visible)").forEach(function (el) {
+      observadorRevela.observe(el);
+      if (pendientes.indexOf(el) < 0) pendientes.push(el);
+    });
   };
+  /* Red de seguridad: un IntersectionObserver no avisa si un elemento pasa de
+     «debajo» a «encima» sin cruzar la pantalla (saltos o desplazamiento muy rápido).
+     Al desplazarse se revelan los pendientes que ya quedaron arriba. */
+  var revisionPendiente = false;
+  function revisarPasados() {
+    revisionPendiente = false;
+    pendientes = pendientes.filter(function (el) {
+      if (el.classList.contains("is-visible")) return false;
+      if (el.getBoundingClientRect().bottom < 0) { el.classList.add("is-visible"); if (observadorRevela) observadorRevela.unobserve(el); return false; }
+      return true;
+    });
+  }
+  window.addEventListener("scroll", function () {
+    if (!pendientes.length || revisionPendiente) return;
+    revisionPendiente = true; requestAnimationFrame(revisarPasados);
+  }, { passive: true });
+  /* Divide un texto en palabras (span.palabra con --i) para revelarlas de forma
+     escalonada. Conserva elementos internos (em, br) y el texto accesible. */
+  O.dividirPalabras = function (el, opciones) {
+    if (!el || el.dataset.palabras) return;
+    el.dataset.palabras = "1";
+    opciones = opciones || {};
+    var n = 0;
+    (function recorrer(nodo) {
+      [].slice.call(nodo.childNodes).forEach(function (c) {
+        if (c.nodeType === 3) {
+          if (!c.textContent.trim()) return;
+          var frag = document.createDocumentFragment();
+          c.textContent.split(/(\s+)/).forEach(function (p) {
+            if (!p) return;
+            if (/^\s+$/.test(p)) { frag.appendChild(document.createTextNode(p)); return; }
+            var s = document.createElement("span");
+            s.className = "palabra"; s.style.setProperty("--i", n++); s.textContent = p;
+            frag.appendChild(s);
+          });
+          nodo.replaceChild(frag, c);
+        } else if (c.nodeType === 1 && !c.classList.contains("sr") && c.tagName !== "BR") recorrer(c);
+      });
+    })(el);
+    if (opciones.paso) el.style.setProperty("--paso", opciones.paso);
+    if (opciones.retardo) el.style.setProperty("--retardo", opciones.retardo);
+    el.classList.add("revela-palabras");
+  };
+
+  /* Escalona la entrada de los hijos de un contenedor (tarjetas, listas). */
+  O.escalonar = function (el, paso) {
+    if (!el) return;
+    [].slice.call(el.children).forEach(function (c, i) { c.style.setProperty("--i", i); });
+    if (paso) el.style.setProperty("--paso", paso);
+    el.classList.add("revela-grupo");
+  };
+
   function iniciarRevelado() {
     if (!("IntersectionObserver" in window) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     document.documentElement.classList.add("js-revela");
     observadorRevela = new IntersectionObserver(function (entradas) {
       entradas.forEach(function (en) {
-        if (en.isIntersecting) { en.target.classList.add("is-visible"); observadorRevela.unobserve(en.target); }
+        // También se revela lo que ya quedó por encima (saltos de ancla o desplazamiento rápido)
+        var pasado = en.rootBounds && en.boundingClientRect.bottom < en.rootBounds.top;
+        if (en.isIntersecting || pasado) { en.target.classList.add("is-visible"); observadorRevela.unobserve(en.target); }
       });
     }, { rootMargin: "0px 0px -8% 0px" });
     O.revelar(document);
@@ -244,6 +302,7 @@
     ]);
     cont.appendChild(grid);
     cont.appendChild(base);
+    O.escalonar(grid, "120ms");
     aplicarDatos(cont);
   }
 
