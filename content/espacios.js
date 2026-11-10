@@ -18,8 +18,8 @@ OCRE.espacios = [
     id: "dance-floor",
     nombre: "Dance Floor",
     lema: "Donde la noche encuentra su ritmo.",
-    texto: "Frente a la cabina del DJ y junto a la barra, Dance Floor es el punto donde la música, la coctelería y el movimiento se encuentran. Un espacio para dejarse llevar por el ritmo, compartir y vivir la noche desde otra perspectiva.",
-    notas: ["Música", "Coctelería", "Baile", "También para comer"],
+    texto: "Está frente a la cabina del DJ y a pocos pasos de la barra. Es la zona para quien viene por la música: se baila, se piden cócteles en barra y también se puede comer en la mesa.",
+    notas: ["DJ y baile", "Junto a la barra", "Servicio de cocina"],
     fotos: [
       { foto: "assets/img/bar/bar-umbral", ancho: 4, alto: 5, alt: "Barra iluminada con equipo de sonido y una figura en movimiento", leyenda: "Dance Floor" },
       { foto: "assets/img/bar/bar-barra", ancho: 3, alto: 4, alt: "Silueta del bartender frente a los estantes iluminados", leyenda: "La barra" }
@@ -30,10 +30,11 @@ OCRE.espacios = [
     id: "sombras",
     nombre: "Sombras",
     lema: "Donde la intimidad encuentra su lugar.",
-    texto: "Entre luces tenues y rincones que invitan a detenerse, Sombras ofrece una atmósfera íntima para compartir sin prisa. Un espacio donde las conversaciones toman protagonismo y cada encuentro encuentra su propio ritmo.",
-    notas: ["Luz tenue", "Conversación", "Ideal para dos o tres personas"],
+    texto: "La zona más íntima, con luz baja y mesas pensadas para conversar. Funciona muy bien para parejas y grupos de dos o tres personas, y según la disponibilidad del día también recibe otras mesas.",
+    notas: ["Parejas", "Grupos de 2 o 3", "Luz baja"],
     fotos: [
-      { foto: "assets/img/bar/bar-luz-baja", ancho: 4, alto: 5, alt: "Mesa con una lámpara pequeña encendida y sillas tapizadas en rojo, en penumbra", leyenda: "Sombras" }
+      { foto: "assets/img/bar/bar-luz-baja", ancho: 4, alto: 5, alt: "Mesa con una lámpara pequeña encendida y sillas tapizadas en rojo, en penumbra", leyenda: "Sombras" },
+      { foto: "assets/img/bar/bar-rincon", ancho: 4, alto: 5, alt: "Rincón con sillones y una lámpara pequeña encendida", leyenda: "Sombras" }
     ],
     accion: { tipo: "reservar", texto: "Reservar mesa" }
   },
@@ -41,8 +42,8 @@ OCRE.espacios = [
     id: "sentidos",
     nombre: "Sentidos",
     lema: "Un espacio para compartir sin perder la intimidad.",
-    texto: "Un ambiente más reservado donde los encuentros encuentran su propio espacio. Sentidos está pensado para grupos, celebraciones y momentos que merecen compartirse alrededor de la mesa, con la comodidad y privacidad que cada ocasión necesita.",
-    notas: ["Grupos", "Celebraciones", "Reservas grandes"],
+    texto: "El área privada de Ocre, para grupos grandes, celebraciones y reservas numerosas. Las mesas se organizan según el tamaño del grupo, así que conviene consultar disponibilidad antes de reservar.",
+    notas: ["Grupos grandes", "Celebraciones", "Área privada"],
     capacidad: { texto: "Alrededor de cinco mesas para 4 a 6 personas cada una, según la configuración.", confirmado: false },
     fotos: [
       { foto: "assets/img/bar/bar-salon", ancho: 4, alto: 5, alt: "Sentidos: mesa larga con sillas bajo una luz roja cálida", leyenda: "Sentidos" },

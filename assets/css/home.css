@@ -274,7 +274,10 @@ main > section { position: relative; padding: var(--seccion) var(--margen); }
 .platos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 5rem; }
 .plato { padding: 1.6rem 0 1.7rem; border-top: 1px solid rgba(43,28,16,.18); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .3rem 1.5rem; align-items: baseline; }
 .plato h3 { font: 400 1.7rem/1.15 var(--serif); }
-.plato__precio { font: 400 var(--t-m)/1 var(--sans); font-variant-numeric: tabular-nums; color: var(--tinta); white-space: nowrap; }
+.plato__precio { font: 400 var(--t-m)/1 var(--sans); font-variant-numeric: tabular-nums; color: var(--tinta); white-space: nowrap; display: grid; justify-items: end; gap: .35rem; }
+.precio__usd { font-size: var(--t-xs); color: var(--tinta-suave); letter-spacing: .02em; }
+.barra-carta td .precio__cop, .barra-carta td .precio__usd { display: block; }
+.barra-carta td .precio__usd { margin-top: .15rem; }
 .plato__desc { grid-column: 1 / -1; color: var(--tinta-suave); font-size: var(--t-s); max-width: 54ch; }
 .plato__frase { grid-column: 1 / -1; font: italic 400 1.15rem/1.35 var(--serif); color: var(--arcilla); }
 .plato__perfil { grid-column: 1 / -1; font-size: var(--t-xs); color: var(--tinta-suave); letter-spacing: .02em; }
@@ -540,6 +543,10 @@ body.sin-scroll { overflow: hidden; }
 .espacio--sombras .espacio__texto { grid-column: 1 / 6; grid-row: 1; }
 .espacio--sombras .espacio__fotos { grid-column: 6 / 13; grid-row: 1; }
 .espacio--sombras .espacio__nombre { font-style: italic; }
+/* Segunda foto de Sombras: más pequeña, superpuesta a la esquina de la principal */
+.espacio--sombras .espacio__foto--1 { width: 82%; }
+.espacio--sombras .espacio__foto--2 { position: relative; z-index: 1; width: 44%; margin: -22% 0 0 auto; box-shadow: 0 30px 70px -25px rgba(0,0,0,.85); }
+.espacio--sombras .espacio__foto--2 .leyenda { text-align: right; }
 .linterna { --lx: 55%; --ly: 42%; transition: --lx .35s ease-out, --ly .35s ease-out; }
 .linterna .foto::after { content: ""; position: absolute; inset: 0; pointer-events: none; transition: opacity .8s var(--curva);
   background: radial-gradient(circle at var(--lx) var(--ly), rgba(15,10,6,0) 0, rgba(15,10,6,.15) 8rem, rgba(15,10,6,.82) 22rem); }

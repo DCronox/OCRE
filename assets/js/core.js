@@ -258,27 +258,56 @@
     window.addEventListener("scroll", solida, { passive: true });
 
     if (toggle && menu) {
-      var cerrar = function (enfocar) {
-        nav.classList.remove("is-abierta");
-        toggle.setAttribute("aria-expanded", "false");
-        toggle.querySelector(".sr").textContent = "Abrir menú";
-        document.body.classList.remove("sin-scroll");
-        if (enfocar) toggle.focus();
+      /* Menú móvil.
+         - Un único estado (abierto) evita aperturas o cierres duplicados.
+         - Bloqueo del desplazamiento compatible con iOS (body fixed + posición
+           guardada); al cerrar se restaura sin animación.
+         - El resto de la página queda inert mientras el menú está abierto. */
+      var abierto = false, posY = 0;
+      var fondo = ["contenido", "pie", "barra-movil"].map(function (id) { return document.getElementById(id); }).filter(Boolean);
+      var etiqueta = toggle.querySelector(".sr");
+      var bloquear = function () {
+        posY = window.scrollY;
+        var b = document.body.style;
+        b.position = "fixed"; b.top = -posY + "px"; b.left = "0"; b.right = "0"; b.width = "100%";
+        document.body.classList.add("menu-abierto");
       };
-      toggle.addEventListener("click", function () {
-        var abrir = toggle.getAttribute("aria-expanded") !== "true";
-        if (!abrir) return cerrar(false);
+      var desbloquear = function () {
+        var b = document.body.style;
+        b.position = ""; b.top = ""; b.left = ""; b.right = ""; b.width = "";
+        document.body.classList.remove("menu-abierto");
+        window.scrollTo({ top: posY, left: 0, behavior: "instant" });
+      };
+      var abrir = function () {
+        if (abierto) return;
+        abierto = true;
+        bloquear();
         nav.classList.add("is-abierta");
         toggle.setAttribute("aria-expanded", "true");
-        toggle.querySelector(".sr").textContent = "Cerrar menú";
-        document.body.classList.add("sin-scroll");
+        if (etiqueta) etiqueta.textContent = "Cerrar menú";
+        fondo.forEach(function (el) { el.dataset.inertPrevio = el.inert ? "1" : ""; el.inert = true; });
         var primero = menu.querySelector("a");
-        if (primero) primero.focus();
+        if (primero) primero.focus({ preventScroll: true });
+      };
+      var cerrar = function (enfocar) {
+        if (!abierto) return;
+        abierto = false;
+        nav.classList.remove("is-abierta");
+        toggle.setAttribute("aria-expanded", "false");
+        if (etiqueta) etiqueta.textContent = "Abrir menú";
+        fondo.forEach(function (el) { el.inert = el.dataset.inertPrevio === "1"; delete el.dataset.inertPrevio; });
+        desbloquear();
+        if (enfocar) toggle.focus({ preventScroll: true });
+      };
+      toggle.addEventListener("click", function () { if (abierto) cerrar(true); else abrir(); });
+      menu.addEventListener("click", function (e) {
+        if (!abierto) return;
+        if (e.target.closest("a")) cerrar(false);          // el enlace sigue su curso hacia la sección
+        else if (e.target === menu) cerrar(true);           // toque en el fondo vacío del panel
       });
-      menu.addEventListener("click", function (e) { if (e.target.closest("a")) cerrar(false); });
       document.addEventListener("keydown", function (e) {
-        if (!nav.classList.contains("is-abierta")) return;
-        if (e.key === "Escape") return cerrar(true);
+        if (!abierto) return;
+        if (e.key === "Escape") { e.preventDefault(); return cerrar(true); }
         if (e.key === "Tab") {   // mantener el foco dentro del menú abierto
           var f = [toggle].concat([].slice.call(menu.querySelectorAll("a")));
           var i = f.indexOf(document.activeElement);
@@ -287,6 +316,7 @@
         }
       });
       window.matchMedia("(min-width: 961px)").addEventListener("change", function (m) { if (m.matches) cerrar(false); });
+      window.addEventListener("pagehide", function () { cerrar(false); });
     }
 
     // Sección activa en el menú

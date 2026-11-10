@@ -355,8 +355,8 @@
       ev.appendChild(h("div", { class: "cartel cartel--vacio" }, [
         h("p", { class: "cartel__fecha", "aria-hidden": "true" }, ["—", h("small", null, "Fecha por anunciar")]),
         h("div", { class: "cartel__cuerpo" }, [
-          h("h4", null, "Agenda en preparación"),
-          h("p", null, "Cuando haya fechas confirmadas, las verás aquí con su artista, horario y opción de reserva. Mientras tanto, sigue nuestro Instagram.")
+          h("h4", null, "Aún no hay fechas anunciadas"),
+          h("p", null, "Las próximas noches aparecerán aquí con el artista, el horario y el enlace para reservar. Mientras tanto, síguenos en Instagram.")
         ]),
         O.enlace("instagram") ? h("a", { class: "btn btn--linea", href: O.enlace("instagram"), target: "_blank", rel: "noopener noreferrer" }, ["Ver Instagram", h("span", { class: "sr" }, " (abre en una pestaña nueva)")]) : null
       ]));
@@ -384,7 +384,7 @@
 
     var dj = document.getElementById("sounds-djs");
     if (!(D.djs || []).length) {
-      dj.appendChild(vacio("Presentaremos aquí a nuestros residentes e invitados.", "Cada artista tendrá su ficha con fotografía, biografía y enlaces a su música."));
+      dj.appendChild(vacio("Los perfiles de los artistas llegarán pronto.", "Cada residente e invitado tendrá aquí su ficha con fotografía, estilo y enlaces a su música."));
     } else {
       var grid = h("ul", { class: "artistas" });
       D.djs.forEach(function (a) {
@@ -422,7 +422,7 @@
           x.leyenda ? h("figcaption", { class: "leyenda" }, ["En la imagen: ", h("em", null, x.leyenda)]) : null
         ]),
         h("h3", null, x.titulo), h("p", null, x.texto),
-        h("p", { class: "ocasion__acciones" }, [a, x.enlace ? h("a", { class: "ocasion__enlace", href: x.enlace }, "Conocer el espacio") : null])
+        h("p", { class: "ocasion__acciones" }, [a, x.enlace ? h("a", { class: "ocasion__enlace", href: x.enlace }, x.enlaceTexto || "Ver el espacio") : null])
       ]));
     });
   }
@@ -431,8 +431,17 @@
   function carta() {
     var C = O.carta, tabs = document.getElementById("carta-tabs"), paneles = document.getElementById("carta-paneles");
     if (!C || !tabs) return;
-    document.getElementById("carta-fuente").textContent = (C.mostrarPrecios ? C.notaPrecios + " " : "") + "Fuente: " + C.fuente + " (consultada el " + O.fechaLarga(C.consultado) + ").";
-    document.getElementById("carta-legal").textContent = "El exceso de alcohol es perjudicial para la salud. Prohíbese el expendio de bebidas embriagantes a menores de edad. Si tienes alergias o restricciones alimentarias, infórmalo al equipo antes de ordenar.";
+    var tasa = C.usd && C.usd.valor;
+    document.getElementById("carta-legal").textContent =
+      (C.mostrarPrecios ? "Precios en pesos colombianos, sujetos a cambios. " + (tasa ? "El valor en dólares es una referencia (TRM del " + O.fechaLarga(C.usd.fecha) + ": $" + tasa.toLocaleString("es-CO", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "); el pago se realiza en pesos. " : "") : "") +
+      "El exceso de alcohol es perjudicial para la salud. Prohíbese el expendio de bebidas embriagantes a menores de edad. Si tienes alergias o restricciones alimentarias, infórmalo al equipo antes de ordenar.";
+    // Precio doble: pesos (principal) y dólares (referencia)
+    function precioDoble(cop, etiqueta) {
+      var usd = tasa ? cop / tasa : null;
+      var txtUsd = usd === null ? null : "US$" + (usd >= 100 ? Math.round(usd).toLocaleString("es-CO") : usd.toLocaleString("es-CO", { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+      return [h("span", { class: "precio__cop" }, O.precio(cop)),
+        txtUsd ? h("span", { class: "precio__usd" }, [h("span", { class: "sr" }, ", aproximadamente "), txtUsd]) : null];
+    }
     var botones = [];
     C.secciones.forEach(function (s, i) {
       var b = h("button", { class: "carta__tab", type: "button", role: "tab", id: "tab-" + s.id, "aria-controls": "panel-" + s.id, "aria-selected": i === 0 ? "true" : "false", tabindex: i === 0 ? "0" : "-1" }, s.titulo);
@@ -448,14 +457,14 @@
       var panel = h("div", { class: "carta__panel", role: "tabpanel", id: "panel-" + s.id, "aria-labelledby": "tab-" + s.id, tabindex: "0", hidden: i === 0 ? null : true }, [
         h("p", { class: "carta__intro" }, s.intro)
       ]);
-      if (s.compacta) panel.appendChild(barra(s, C.mostrarPrecios));
+      if (s.compacta) panel.appendChild(barra(s, C.mostrarPrecios, precioDoble));
       else {
         var ul = h("ul", { class: "platos" });
         s.items.forEach(function (it) {
           ul.appendChild(h("li", { class: it.foto ? "plato plato--foto" : "plato" }, [
             it.foto ? O.foto(it.foto, { ancho: it.ancho || 4, alto: it.alto || 5, alt: it.alt || it.nombre, sizes: "120px" }) : null,
             h("h3", null, it.nombre),
-            C.mostrarPrecios && it.precio ? h("p", { class: "plato__precio" }, O.precio(it.precio)) : null,
+            C.mostrarPrecios && it.precio ? h("p", { class: "plato__precio" }, precioDoble(it.precio)) : null,
             it.frase ? h("p", { class: "plato__frase" }, it.frase) : null,
             it.desc ? h("p", { class: "plato__desc" }, it.desc) : null,
             it.perfil && it.perfil.length ? h("p", { class: "plato__perfil" }, it.perfil.join(" · ")) : null,
@@ -478,7 +487,7 @@
     }
   }
 
-  function barra(s, conPrecios) {
+  function barra(s, conPrecios, precioDoble) {
     var wrap = h("div", { class: "barra-carta" });
     s.grupos.forEach(function (g) {
       var cols = g.columnas || s.columnas;
@@ -487,8 +496,8 @@
         conPrecios ? h("thead", null, h("tr", null, [h("th", { scope: "col" }, h("span", { class: "sr" }, "Producto")), h("th", { scope: "col" }, cols[0] || h("span", { class: "sr" }, "Sin presentación")), h("th", { scope: "col" }, cols[1])])) : null,
         h("tbody", null, g.items.map(function (it) {
           return h("tr", null, [h("th", { scope: "row", style: "font-weight:300" }, it.nombre)].concat(conPrecios ? [
-            h("td", null, it.precios[0] ? O.precio(it.precios[0]) : h("span", { "aria-label": "No disponible" }, "—")),
-            h("td", null, it.precios[1] ? O.precio(it.precios[1]) : "—")
+            h("td", null, it.precios[0] ? precioDoble(it.precios[0]) : h("span", { "aria-label": "No disponible" }, "—")),
+            h("td", null, it.precios[1] ? precioDoble(it.precios[1]) : "—")
           ] : []));
         }))
       ]);
@@ -628,7 +637,7 @@
       ]);
       lista.appendChild(art);
       if (indice) indice.appendChild(h("a", { href: "#espacio-" + e.id }, [h("span", { "aria-hidden": "true" }, String(n + 1).padStart(2, "0")), e.nombre]));
-      if (e.id === "sombras") linterna(art.querySelector(".espacio__fotos"));
+      if (e.id === "sombras") linterna(art.querySelector(".espacio__foto--1"));
     });
   }
 

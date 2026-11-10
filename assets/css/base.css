@@ -117,8 +117,15 @@ a[target="_blank"].btn::after { content: "↗"; font-size: .85em; opacity: .7; }
   transition: background-color .5s, border-color .5s;
   border-bottom: 1px solid transparent;
 }
-.nav.is-solida { background: rgba(43, 28, 16, .88); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-color: var(--linea); }
-.nav__marca { font: 500 1.45rem/1 var(--serif); letter-spacing: .36em; color: var(--caliza); text-decoration: none; margin-right: auto; transition: color .3s; }
+/* El fondo sólido y el desenfoque viven en un pseudo-elemento.
+   IMPORTANTE: no poner backdrop-filter/filter/transform en .nav: convierten la
+   barra en el bloque contenedor de sus hijos position:fixed y el menú móvil
+   (que es fixed a pantalla completa) quedaría encerrado en la barra. */
+.nav::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: 0; transition: opacity .5s;
+  background: rgba(43, 28, 16, .88); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+.nav.is-solida::before { opacity: 1; }
+.nav.is-solida { border-color: var(--linea); }
+.nav__marca { font: 500 1.45rem/1 var(--serif); letter-spacing: .36em; color: var(--caliza); text-decoration: none; margin-right: auto; padding: .7rem 0; transition: color .3s; }
 .nav__marca:hover { color: var(--ambar); }
 .nav__menu ul { display: flex; gap: clamp(1rem, 2.2vw, 2.2rem); }
 .nav__menu a:not(.btn) { font-size: var(--t-s); text-decoration: none; color: var(--caliza-suave); padding: .4rem 0; position: relative; transition: color .3s; }
@@ -131,23 +138,30 @@ a[target="_blank"].btn::after { content: "↗"; font-size: .85em; opacity: .7; }
 @media (max-width: 960px) {
   .nav { gap: 1rem; }
   .nav__reservar { min-height: 2.4rem; padding: .4rem 1rem; position: relative; z-index: 2; }
-  .nav__toggle { display: grid; gap: 7px; place-content: center; width: 2.9rem; height: 2.9rem; position: relative; z-index: 2; }
+  .nav__marca { position: relative; z-index: 2; }
+  .nav__toggle { display: grid; gap: 7px; place-content: center; width: 3rem; height: 3rem; margin-right: -.4rem; position: relative; z-index: 2; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
   .nav__toggle i { display: block; width: 1.6rem; height: 1px; background: var(--caliza); transition: transform .45s var(--curva); }
   .nav__toggle[aria-expanded="true"] i:first-of-type { transform: translateY(4px) rotate(45deg); }
   .nav__toggle[aria-expanded="true"] i:last-of-type { transform: translateY(-4px) rotate(-45deg); }
   .nav__menu {
-    position: fixed; inset: 0; z-index: 1; background: var(--carbon);
-    display: flex; flex-direction: column; justify-content: flex-end; gap: 2.5rem;
+    position: fixed; inset: 0; z-index: 1; background: var(--carbon); overflow-y: auto; overscroll-behavior: contain;
+    display: flex; flex-direction: column; justify-content: flex-start; gap: 2.5rem;
     padding: calc(var(--nav-alto) + 2rem) var(--margen) calc(2.5rem + env(safe-area-inset-bottom, 0px));
     visibility: hidden; clip-path: inset(0 0 100% 0); transition: clip-path .6s var(--curva), visibility 0s .6s;
   }
   .nav.is-abierta .nav__menu { visibility: visible; clip-path: inset(0); transition: clip-path .6s var(--curva); }
-  .nav__menu ul { flex-direction: column; gap: .2rem; }
+  /* margin-top:auto empuja la lista hacia abajo cuando hay espacio, pero si no cabe
+     empieza bajo la cabecera y se desplaza (justify-content:flex-end la cortaba por arriba) */
+  .nav__menu ul { flex-direction: column; gap: .2rem; margin-top: auto; }
   .nav__menu a:not(.btn) { display: block; font: 300 clamp(2.2rem, 9vw, 3rem)/1.2 var(--serif); color: var(--caliza); }
   .nav__menu a:not(.btn)::after { display: none; }
   .nav__menu a[aria-current="true"] { color: var(--ambar); }
   .nav__reservar-movil { display: flex; width: 100%; }
   .nav__pie-movil { display: block; color: var(--caliza-suave); font-size: var(--t-s); }
+  @media (max-height: 720px) {
+    .nav__menu { gap: 1.6rem; padding-top: calc(var(--nav-alto) + 1rem); }
+    .nav__menu a:not(.btn) { font-size: clamp(1.7rem, 7vw, 2.2rem); line-height: 1.25; }
+  }
   .nav.is-abierta .nav__reservar { visibility: hidden; }
 }
 @media (max-width: 360px) { .nav__reservar { display: none; } }
@@ -206,7 +220,8 @@ a[target="_blank"].btn::after { content: "↗"; font-size: .85em; opacity: .7; }
 .pie__marca { font: 400 clamp(3.5rem, 9vw, 6.5rem)/.9 var(--serif); letter-spacing: .14em; color: var(--ambar); }
 .pie__lema { font: italic 300 var(--t-l)/1.3 var(--serif); color: var(--caliza-suave); margin-top: 1rem; }
 .pie h2 { font: 400 var(--t-s)/1.4 var(--sans); color: var(--ambar); margin-bottom: 1rem; letter-spacing: .04em; }
-.pie li + li { margin-top: .45rem; }
+.pie li + li { margin-top: .2rem; }
+.pie li a, .pie li button, .pie p > a { display: inline-block; padding: .55rem 0; }
 .pie a { color: var(--caliza-suave); text-decoration: none; }
 .pie a:hover { color: var(--caliza); text-decoration: underline; }
 .pie address, .pie p { font-style: normal; color: var(--caliza-suave); font-size: var(--t-s); }

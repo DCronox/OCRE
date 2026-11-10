@@ -49,15 +49,15 @@ OCRE.galerias = [
   },
   {
     id: "bar-oculto", titulo: "El bar oculto", carpeta: "assets/img/bar",
-    linea: "Hay que saber dónde tocar.",
-    intro: "El espacio, la penumbra y la barra. Lo que se descubre al cruzar.",
+    linea: "La entrada, la barra y sus tres zonas.",
+    intro: "Un recorrido por el lugar: la entrada, la barra, Dance Floor, Sombras y Sentidos.",
     portada: { foto: "assets/img/bar/bar-umbral", ancho: 4, alto: 5, alt: "Vista desde la penumbra hacia la barra iluminada de Ocre" },
     items: [
       { titulo: "Entrada", foto: "assets/img/bar/bar-entrada", ancho: 4, alto: 5, alt: "Escalera de acceso con apliques de luz cálida sobre el muro" },
       { titulo: "Dance Floor", foto: "assets/img/bar/bar-umbral", ancho: 4, alto: 5, alt: "Vista desde la penumbra hacia la barra iluminada, con una figura en movimiento" },
       { titulo: "La barra", foto: "assets/img/bar/bar-barra", ancho: 3, alto: 4, alt: "Silueta del bartender frente a los estantes iluminados en rojo" },
-      { titulo: "Sentidos", frase: "Un espacio para compartir sin perder la intimidad.", historia: "Entre la calidez de la tierra y la complicidad de los encuentros, Sentidos nace como un refugio para compartir. Un espacio donde los grupos encuentran su propio universo, donde las conversaciones fluyen sin prisa y cada encuentro se convierte en un recuerdo. Porque hay momentos que merecen vivirse lejos del ruido exterior.", foto: "assets/img/bar/bar-salon", ancho: 4, alto: 5, alt: "Sentidos: espacio con mesa larga y sillas para grupos, bajo una luz roja cálida" },
-      { titulo: "Sentidos", frase: "Un espacio para compartir sin perder la intimidad.", historia: "Entre la calidez de la tierra y la complicidad de los encuentros, Sentidos nace como un refugio para compartir. Un espacio donde los grupos encuentran su propio universo, donde las conversaciones fluyen sin prisa y cada encuentro se convierte en un recuerdo. Porque hay momentos que merecen vivirse lejos del ruido exterior.", foto: "assets/img/bar/bar-penumbra", ancho: 4, alto: 5, alt: "Sentidos en penumbra, con ventanales de luz cálida y una figura de pie" },
+      { titulo: "Sentidos", frase: "Un espacio para compartir sin perder la intimidad.", foto: "assets/img/bar/bar-salon", ancho: 4, alto: 5, alt: "Sentidos: espacio con mesa larga y sillas para grupos, bajo una luz roja cálida" },
+      { titulo: "Sentidos", frase: "Un espacio para compartir sin perder la intimidad.", foto: "assets/img/bar/bar-penumbra", ancho: 4, alto: 5, alt: "Sentidos en penumbra, con ventanales de luz cálida y una figura de pie" },
       { titulo: "Sombras", foto: "assets/img/bar/bar-rincon", ancho: 4, alto: 5, alt: "Rincón del bar con sillones y una lámpara pequeña encendida" },
       { titulo: "Sombras", foto: "assets/img/bar/bar-luz-baja", ancho: 4, alto: 5, alt: "Mesa con lámpara encendida y sillas tapizadas en rojo" },
       { titulo: "Oculto", foto: "assets/img/bar/bar-silueta", ancho: 4, alto: 5, alt: "Silueta de una persona en un pasillo iluminado por una línea de luz roja" }
@@ -66,7 +66,7 @@ OCRE.galerias = [
   {
     id: "sonoridad", titulo: "Sonoridad", carpeta: "assets/img/djs",
     linea: "La música como parte del menú.",
-    intro: "Cabina, vinilos y noches. El sonido es uno de los ingredientes de Ocre.",
+    intro: "La cabina, los vinilos y lo que suena en Ocre.",
     portada: { foto: "assets/img/djs/sonoridad-vinilos", ancho: 4, alto: 5, alt: "Muro con portadas de vinilos iluminadas" },
     items: [
       { titulo: "Vinilos", foto: "assets/img/djs/sonoridad-vinilos", ancho: 4, alto: 5, alt: "Muro con portadas de vinilos iluminadas en luz cálida" },
@@ -87,8 +87,8 @@ OCRE.galerias = [
   },
   {
     id: "arte", titulo: "Arte", carpeta: "assets/img/arte",
-    linea: "Texturas, materia y color.",
-    intro: "Los materiales, los muros y los detalles que hacen del espacio una pieza más.",
+    linea: "Objetos, diseño y color.",
+    intro: "Las piezas y los materiales que componen el interiorismo de Ocre.",
     portada: { foto: "assets/img/arte/arte-luz", ancho: 4, alto: 5, alt: "Pasamanos iluminado en diagonal sobre un muro oscuro" },
     items: [
       { titulo: "Luz y línea", foto: "assets/img/arte/arte-luz", ancho: 4, alto: 5, alt: "Pasamanos iluminado que recorre en diagonal un muro oscuro" },

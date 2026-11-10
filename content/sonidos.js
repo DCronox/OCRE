@@ -30,7 +30,7 @@ window.OCRE = window.OCRE || {};
 
 OCRE.sonidos = {
   // Texto de concepto: describe la intención, sin afirmar programación concreta.
-  concepto: "En Ocre la música no acompaña: marca el pulso de la noche. La cocina abre con calma y, a medida que la noche avanza, el sonido sube con ella.",
+  concepto: "La programación musical de Ocre: DJs residentes, artistas invitados y noches especiales. Aquí se publicarán las fechas, quién toca y cómo reservar.",
   estilos: [],     // ej. ["House", "Disco", "Afro"] — pendiente de confirmar
   djs: [],         // residentes e invitados (ver plantilla arriba)
   eventos: [],     // próximas fechas (ver plantilla arriba)

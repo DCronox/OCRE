@@ -32,6 +32,10 @@ OCRE.carta = {
   fuente: "Carta publicada por Ocre en su sistema de reservas",
   consultado: "2026-11-09",
   mostrarPrecios: true,
+  // Precio de referencia en dólares: COP ÷ TRM. Actualiza `valor` y `fecha` cuando
+  // cambien los precios o la tasa. Pon `valor: null` para ocultar los dólares.
+  // TRM certificada por la Superintendencia Financiera para el 9-nov-2026.
+  usd: { valor: 3237.83, fecha: "2026-11-09" },
   notaPrecios: "Precios en pesos colombianos publicados por el establecimiento. Pueden cambiar sin previo aviso; confírmalos en el lugar.",
 
   secciones: [
@@ -49,7 +53,7 @@ OCRE.carta = {
     },
     {
       id: "fuertes", titulo: "Platos fuertes",
-      intro: "El centro de la noche.",
+      intro: "Los platos principales.",
       items: [
         { nombre: "Lomo duxelle y centeno", foto: "assets/img/platos/lomo-duxelle-y-centeno", ancho: 2, alto: 3, alt: "Fotografía de Ocre con los ingredientes de Lomo duxelle y centeno", ingredientes: true, precio: 110900, desc: "Medallón de res (USDA) relleno de duxelle de setas y tuétano, jus Rossini con trufa y foie gras, zanahorias baby glaseadas en gastrique de vinagre con crumble de centeno y papas a la francesa." },
         { nombre: "Chicken Sticky (picante)", foto: "assets/img/platos/chicken-sticky", ancho: 2, alto: 3, alt: "Fotografía de Ocre con los ingredientes de Chicken Sticky (picante)", ingredientes: true, precio: 47900, desc: "Pernil de pollo frito en trozos, salsa estilo coreano ligeramente picante, cebollín y papa crocante." },
